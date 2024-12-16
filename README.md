@@ -1,5 +1,5 @@
-[![NPM Version](https://img.shields.io/npm/v/@raito-cache/expressjs)](https://www.npmjs.com/package/@raito-cache/expressjs)
-[![Node.js CI](https://github.com/stbestichhh/raito-expressjs/actions/workflows/node.js.yml/badge.svg)](https://github.com/stbestichhh/raito-expressjs/actions/workflows/node.js.yml)
+[![NPM Version](https://img.shields.io/npm/v/@raito-cache/nestjs)](https://www.npmjs.com/package/@raito-cache/nestjs)
+[![Node.js CI](https://github.com/stbestichhh/raito-nestjs/actions/workflows/node.js.yml/badge.svg)](https://github.com/stbestichhh/raito-nestjs/actions/workflows/node.js.yml)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -18,7 +18,7 @@
 
 ## About
 
-**raito-expressjs** - is an Nest.js middleware and API for communicating with **[Raito](https://github.com/stbestichhh/raito-cache) cache server**. 
+**raito-nestjs** - is an Nest.js middleware and API for communicating with **[Raito](https://github.com/stbestichhh/raito-cache) cache server**. 
 
 ## Getting started
 
