@@ -1,5 +1,5 @@
-[![NPM Version](https://img.shields.io/npm/v/@raito-cache/expressjs)](https://www.npmjs.com/package/@raito-cache/expressjs)
-[![Node.js CI](https://github.com/stbestichhh/raito-expressjs/actions/workflows/node.js.yml/badge.svg)](https://github.com/stbestichhh/raito-expressjs/actions/workflows/node.js.yml)
+[![NPM Version](https://img.shields.io/npm/v/@raito-cache/nestjs)](https://www.npmjs.com/package/@raito-cache/nestjs)
+[![Node.js CI](https://github.com/stbestichhh/raito-nestjs/actions/workflows/node.js.yml/badge.svg)](https://github.com/stbestichhh/raito-nestjs/actions/workflows/node.js.yml)
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -18,74 +18,125 @@
 
 ## About
 
-**raito-expressjs** - is an Nest.js middleware and API for communicating with **[Raito](https://github.com/stbestichhh/raito-cache) cache server**. 
+**raito-nestjs** - is an Nest.js middleware and API for communicating with **[Raito](https://github.com/stbestichhh/raito-cache) cache server**. 
 
 ## Getting started
 
 > [!IMPORTANT]
 > **Node.js 18.x+** version must be installed in your OS.
 
-#### 1. Install server
+#### 1. Install package
   ```shell
-  $ yarn add express
   $ yarn add @raito-cache/nestjs
   ```
 
 #### 2. Connect to Raito 
 ```typescript
-import { Raito } from '@raito-cache/nestjs';
+import { Module } from '@nestjs/common';
+import { RaitoModule } from '@raito-cache/nestjs';
 
-const raito = new Raito(); // defaul connection is localhost:9180
+@Module({
+  imports: [RaitoModule.register()],    
+})
+export class AppModule {}
 ```
 
-#### 3. Use middleware
+#### 3. Use Interceptor
 ```typescript
-import { cacheMiddleware } from '@raito-cache/nestjs'
+import { RaitoInterceptor } from '@raito-cache/nestjs';
 
-app.get('/api/route', cacheResponse);
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
+  @UseInterceptors(RaitoInterceptor)
+  async getHello() {
+    return await this.appService.getHello();
+  }
+}
 ```
 
 ## API
 
 ### Connect to Raito
 ```typescript
-new Raito(); // Connect to localhost:9180
-new Raito(7180); // localhost:7180
-new Raito('raito://localhost:9180'); // localhost:9180
-new Raito('raito://localhost:9180?ttl=5000'); // localhost:9180 and ttl 5s
-new Raito({
-  port: 9180, // Raito port
-  host: 'localhost', // Raito host
-  ttl: 10000, // Cache records time to live
+// Async
+RaitoModule.registerAsync({
+  useFactory: () => ({
+    port: 9180, // Raito port
+    host: 'localhost', // Raito host
+    ttl: 10000, // Cache records time to live  
+  }),
+})
+
+// Sync
+RaitoModule.register() // Connect to localhost:9180
+RaitoModule.register(7180); // localhost:7180
+RaitoModule.register('raito://localhost:9180'); // localhost:9180
+RaitoModule.register('raito://localhost:9180?ttl=5000'); // localhost:9180 and ttl 5s
+RaitoModule.register({
+  port: 9180,
+  host: 'localhost',
+  ttl: 10000,
 });
 ```
 
 ### Usage
 
-**Raito class**
+#### Raito Interceptor as global
 ```typescript
-import { Raito } from '@raito-cache/nestjs';
+import { Module } from '@nestjs/common';
+import { RaitoInterceptor, RaitoModule } from '@raito-cache/nestjs';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
-const raito = new Raito();
-
-await raito.set('key', { data: 'some data' }); // Create new record 
-await raito.set('key2', 'other data', 15000); // Create new record with 15s ttl
-
-await raito.get('key2'); // Output: { key: 'key', data: 'other data', createdAt: Date, ttl: 15000 }
-await raito.clear('key'); // Deletes record
-
-await raito.shutdown(); // Close connection
+@Module({
+  imports: [RaitoModule.register()],  
+  providers: [    
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RaitoInterceptor,
+    }
+  ],
+})
+export class AppModule {}
 ```
 
-**Express.js middleware**
+#### Raito Interceptor as local
 ```typescript
-import { cacheMiddleware } from '@raito-cache/nestjs'
-import { Raito } from '@raito-cache/expressjs';
+import { RaitoInterceptor } from '@raito-cache/nestjs';
 
-const raito = new Raito();
+@Controller()
+export class AppController {
+  constructor(private readonly appService: AppService) {}
 
-app.get('/api/route', cacheResponse); // Caches responses
-app.get('/api/timeSensetive/data', cacheResponse(15000)); // Cache response with setting record ttl
+  @Get()
+  @UseInterceptors(RaitoInterceptor)
+  async getHello() {
+    return await this.appService.getHello();
+  }
+}
+```
+
+#### Raito Service
+```typescript
+import { Injectable } from '@nestjs/common';
+import { RaitoService } from '@raito-cache/nestjs';
+
+@Injectable()
+export class AppService {
+  constructor(private readonly raito: RaitoService) {}
+  
+  useSerive() {
+    await raito.set('key', { data: 'some data' }); // Create new record 
+    await raito.set('key2', 'other data', 15000); // Create new record with 15s ttl
+
+    await raito.get('key2'); // Output: { key: 'key', data: 'other data', createdAt: Date, ttl: 15000 }
+    await raito.clear('key'); // Deletes record
+
+    await raito.shutdown(); // Close connection   
+  }
+}
 ```
 
 ## Raito Deployment
