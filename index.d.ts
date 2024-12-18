@@ -38,7 +38,7 @@ export declare class RaitoService {
 }
 
 export declare class RaitoModule {
-  public static register(options: RaitoOptions): DynamicModule;
+  public static register(options?: RaitoOptions): DynamicModule;
   public static registerAsync(options: RaitoModuleAsyncOptions): DynamicModule;
 }
 

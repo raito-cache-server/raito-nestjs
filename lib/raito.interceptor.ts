@@ -1,6 +1,7 @@
 import {
   CallHandler,
   ExecutionContext,
+  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
@@ -11,7 +12,9 @@ import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class RaitoInterceptor implements NestInterceptor {
-  constructor(private readonly raitoService: RaitoService) {}
+  constructor(
+    @Inject('RAITO_SERVICE') private readonly raitoService: RaitoService,
+  ) {}
 
   public async intercept(context: ExecutionContext, next: CallHandler<any>) {
     const request = context.switchToHttp().getRequest();
@@ -20,7 +23,7 @@ export class RaitoInterceptor implements NestInterceptor {
     const cacheResponse = await this.raitoService.get(cacheKey);
     if (cacheResponse) {
       return new Observable((sub) => {
-        sub.next(cacheResponse);
+        sub.next(cacheResponse.data);
         sub.complete();
       });
     }

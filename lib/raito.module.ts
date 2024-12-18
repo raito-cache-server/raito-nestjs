@@ -7,22 +7,21 @@ import { RaitoOptions } from './connection_opts';
 @Global()
 @Module({})
 export class RaitoModule {
-  private static raito: Raito | null = null;
-
   public static register(options?: RaitoOptions): DynamicModule {
-    const raito = new Raito(options);
-    this.raito = raito;
-
     return {
       module: RaitoModule,
       providers: [
         {
           provide: 'RAITO_INSTANCE',
-          useValue: raito,
+          useValue: new Raito(options),
+        },
+        {
+          provide: 'RAITO_SERVICE',
+          useClass: RaitoService,
         },
         RaitoService,
       ],
-      exports: ['RAITO_INSTANCE', RaitoService],
+      exports: ['RAITO_INSTANCE', 'RAITO_SERVICE', RaitoService],
     };
   }
 
@@ -39,15 +38,17 @@ export class RaitoModule {
         {
           provide: 'RAITO_INSTANCE',
           useFactory: (options: RaitoOptions) => {
-            const raito = new Raito(options);
-            this.raito = raito;
-            return raito;
+            return new Raito(options);
           },
           inject: ['RAITO_OPTIONS'],
         },
+        {
+          provide: 'RAITO_SERVICE',
+          useClass: RaitoService,
+        },
         RaitoService,
       ],
-      exports: ['RAITO_INSTANCE', RaitoService],
+      exports: ['RAITO_INSTANCE', 'RAITO_SERVICE', RaitoService],
     };
   }
 }
